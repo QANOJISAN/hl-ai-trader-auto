@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="googlebot" content="noindex, nofollow, noarchive" />
+  <meta name="theme-color" content="#0d9488" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="HL AI Trader" />
+  <title>HL AI Trader v1 — ゼロ知識暗号化AI自動売買コンソール (AES-256-GCM)</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --panel: #111827;
+      --border: #1f2937;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #3b82f6;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --red: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+      background: var(--bg); color: var(--text);
+    }
+
+    /* =========================================================================
+       Forensic Ledger 完全準拠: AES-256-GCM 認証ロック画面スタイル
+       ========================================================================= */
+    #hl-lock-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: radial-gradient(circle at 20% 20%, #0f2942 0%, #091326 55%, #050b14 100%);
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .lock-card {
+      width: 100%;
+      max-width: 440px;
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      border-radius: 20px;
+      padding: 30px 26px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    @keyframes lockShake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .lock-card.shake {
+      animation: lockShake 0.36s ease;
+    }
+    .lock-logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .lock-logo-badge {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
+      flex-shrink: 0;
+    }
+    .lock-title {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+    .lock-subtitle {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+    .lock-spec-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .lock-spec-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(2, 132, 199, 0.18);
+      color: #7dd3fc;
+      border: 1px solid rgba(125, 211, 252, 0.25);
+    }
+    .lock-field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 7px;
+    }
+    .lock-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .lock-pw-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 46px 0 14px;
+      border-radius: 11px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(2, 6, 23, 0.75);
+      color: #ffffff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 16px !important;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+    .lock-pw-input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22);
+    }
+    .lock-pw-toggle {
+      position: absolute;
+      right: 8px;
+      width: 34px;
+      height: 34px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+      padding: 0;
+    }
+    .lock-remember-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      margin-bottom: 18px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(30, 41, 59, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      cursor: pointer;
+      user-select: none;
+    }
+    .lock-remember-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      accent-color: #0284c7;
+      flex-shrink: 0;
+    }
+    .lock-remember-text {
+      font-size: 12px;
+      color: #e2e8f0;
+      line-height: 1.45;
+    }
+    .lock-remember-sub {
+      display: block;
+      font-size: 10.5px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+    .lock-submit-btn {
+      width: 100%;
+      height: 48px;
+      border: none;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%);
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 14.5px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.35);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .lock-submit-btn:hover { filter: brightness(1.08); }
+    .lock-submit-btn:disabled { opacity: 0.6; cursor: wait; }
+    .lock-msg {
+      margin-top: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      min-height: 18px;
+    }
+    .lock-msg.err { color: #f87171; }
+    .lock-msg.ok { color: #34d399; }
+    .lock-footer-note {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(148, 163, 184, 0.16);
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    /* =========================================================================
+       メインダッシュボードスタイル
+       ========================================================================= */
+    header {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+      padding: 14px 18px; background: var(--panel); border: 1px solid var(--border);
+      border-radius: 12px; margin-bottom: 16px; gap: 12px;
+    }
+    .badge {
+      padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 0.85rem;
+    }
+    .badge-RUNNING { background: rgba(16,185,129,0.2); color: var(--green); border: 1px solid var(--green); }
+    .badge-PAUSED  { background: rgba(245,158,11,0.2); color: var(--amber); border: 1px solid var(--amber); }
+    .badge-HALTED  { background: rgba(239,68,68,0.25); color: var(--red); border: 1px solid var(--red); }
+    .mode-badge {
+      padding: 5px 11px; border-radius: 8px; font-weight: 700; font-size: 0.78rem;
+    }
+    .mode-local { background: rgba(59,130,246,0.18); color: #93c5fd; border: 1px solid rgba(59,130,246,0.45); }
+    .mode-pwa   { background: rgba(13,148,136,0.2); color: #5eead4; border: 1px solid rgba(13,148,136,0.45); }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    button {
+      cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 14px; font-weight: 600; color: var(--text); background: #1e293b;
+      transition: opacity 0.15s;
+    }
+    button:hover { opacity: 0.9; }
+    .btn-pause { border-color: var(--amber); color: #fcd34d; }
+    .btn-resume { border-color: var(--green); color: #6ee7b7; }
+    .btn-clear { border-color: var(--accent); color: #93c5fd; }
+    .btn-danger { background: rgba(239,68,68,0.2); border-color: var(--red); color: #fca5a5; }
+    .btn-refresh { border-color: #38bdf8; color: #7dd3fc; }
+    .btn-lock-now {
+      background: rgba(239,68,68,0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239,68,68,0.5);
+    }
+    .btn-lock-now:hover {
+      background: #dc2626;
+      color: #ffffff;
+      border-color: #dc2626;
+    }
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px; margin-bottom: 16px;
+    }
+    .card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px;
+    }
+    .card h3 { margin: 0 0 10px 0; font-size: 0.95rem; color: var(--muted); }
+    .big-val { font-size: 1.65rem; font-weight: 800; margin-bottom: 4px; }
+    .sub-val { font-size: 0.95rem; color: var(--muted); }
+    canvas { width: 100%; height: 260px; background: #090d16; border-radius: 8px; border: 1px solid var(--border); }
+    .toolbar { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    select {
+      background: #1e293b; color: var(--text); border: 1px solid var(--border);
+      border-radius: 6px; padding: 6px 10px;
+    }
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+      align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal {
+      background: var(--panel); border: 1px solid var(--red); border-radius: 12px;
+      padding: 20px; max-width: 420px; width: 92%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🔒 Forensic Ledger 準拠: 起動時パスワード認証ロック画面 -->
+  <div id="hl-lock-screen">
+    <div class="lock-card" id="hl-lock-card">
+      <div class="lock-logo-wrap">
+        <div class="lock-logo-badge">HL</div>
+        <div>
+          <div class="lock-title">🔒 HL AI Trader 認証ロック</div>
+          <div class="lock-subtitle">ゼロ知識クライアント復号型 Hyperliquid AI自動売買ダッシュボード</div>
+        </div>
+      </div>
+
+      <div class="lock-spec-pills">
+        <span class="lock-spec-pill">AES-256-GCM</span>
+        <span class="lock-spec-pill">PBKDF2-SHA256 (150,000回)</span>
+        <span class="lock-spec-pill">noindex / 完全暗号化</span>
+      </div>
+
+      <form id="hl-unlock-form" onsubmit="handleUnlockSubmit(event)">
+        <label class="lock-field-label" for="hl-pw-input">復号パスワードを入力</label>
+        <div class="lock-input-wrap">
+          <input
+            type="password"
+            id="hl-pw-input"
+            class="lock-pw-input"
+            placeholder="パスワードを入力..."
+            autocomplete="current-password"
+            required
+          />
+          <button type="button" class="lock-pw-toggle" onclick="togglePwVisibility()" title="パスワードの表示切替" id="hl-pw-eye">👁️</button>
+        </div>
+
+        <label class="lock-remember-row" for="hl-remember-chk">
+          <input type="checkbox" id="hl-remember-chk" checked />
+          <span class="lock-remember-text">
+            ✅ この端末（ブラウザ）にロック解除状態を記憶する
+            <span class="lock-remember-sub">次回からホーム画面アイコンをタップするだけで0.5秒で即起動します（ヘッダーの「🔒 今すぐロック」でいつでも解除可能）</span>
+          </span>
+        </label>
+
+        <button type="submit" class="lock-submit-btn" id="hl-unlock-btn">
+          <span>🔓 ロック解除してダッシュボードを開く</span>
+        </button>
+        <div class="lock-msg" id="hl-lock-msg"></div>
+      </form>
+
+      <div class="lock-footer-note">
+        ※ 公開スナップショットには平文の取引データ・銘柄名・ウォレットアドレスは1文字も含まれていません。パスワードから導出した鍵によりブラウザのメモリ上 (Web Crypto API) でのみ復号されます。
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔓 ロック解除後のメインダッシュボードマウントコンテナ (初期状態は非表示) -->
+  <div id="hl-app-mount" style="display:none;">
+    <header>
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <strong style="font-size:1.2rem;">HL AI Trader v1</strong>
+          <span id="connectionModeBadge" class="mode-badge mode-pwa">📱 接続モード判定中...</span>
+          <span id="statusBadge" class="badge badge-PAUSED">PAUSED</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; font-size:0.82rem; color:var(--muted);">
+          <span id="lastUpdatedLabel">最終更新: --</span>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div id="localControlButtons" class="controls">
+          <button class="btn-pause" onclick="sendCommand('PAUSE')">⏸️ 一時停止 (PAUSE)</button>
+          <button class="btn-resume" onclick="sendCommand('RESUME')">▶️ 売買再開 (RESUME)</button>
+          <button class="btn-clear" onclick="sendCommand('CLEAR_PENDING_BUYS')">🧹 待機買い指値クリア</button>
+          <button class="btn-danger" onclick="openConfirmModal()">🚨 緊急全決済 (EMERGENCY)</button>
+        </div>
+        <div class="controls">
+          <button class="btn-refresh" id="btnManualRefresh" onclick="manualRefreshDashboard()">🔄 更新 (最新データ取得)</button>
+          <button class="btn-lock-now" id="btnLockNow" onclick="lockNow()">🔒 今すぐロック</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <h3>総資産評価額 (Total Equity USDC / JPY)</h3>
+        <div class="big-val" id="eqUsdc">-- USDC</div>
+        <div class="sub-val" id="eqJpy">≈ -- JPY (Rate: --)</div>
+        <div class="sub-val" id="hwmAndL5" style="margin-top:8px;">HWM: -- USDC | L5防衛ライン(85%): -- USDC</div>
+      </div>
+      <div class="card">
+        <h3>第1枠 (Slot 1 — Primary 70%)</h3>
+        <div id="slot1Box">State: IDLE</div>
+      </div>
+      <div class="card">
+        <h3>第2枠 (Slot 2 — Conditional Freeroll)</h3>
+        <div id="slot2Box">State: IDLE</div>
+      </div>
+      <div class="card">
+        <h3>税務サマリー (二重課税イベント台帳)</h3>
+        <div id="taxBox">移動平均法: -- JPY / 総平均法: -- JPY</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>総資産推移チャート (USDC / JPY &amp; HWM / L5 85% Line)</h3>
+        <canvas id="equityCanvas" width="600" height="260"></canvas>
+      </div>
+      <div class="card">
+        <h3>銘柄別ローソク足 ＋ Entry / TP / SL 水平ライン</h3>
+        <div class="toolbar">
+          <select id="pairSelect" onchange="loadChart()">
+            <option value="UZEC/USDC">UZEC/USDC</option>
+            <option value="HYPE/USDC">HYPE/USDC</option>
+            <option value="UBTC/USDC">UBTC/USDC</option>
+            <option value="UETH/USDC">UETH/USDC</option>
+            <option value="USOL/USDC">USOL/USDC</option>
+            <option value="PURR/USDC">PURR/USDC</option>
+            <option value="XMR1/USDC">XMR1/USDC</option>
+          </select>
+          <select id="intervalSelect" onchange="loadChart()">
+            <option value="15m">15m</option>
+            <option value="1h">1h</option>
+            <option value="4h">4h</option>
+            <option value="1D">1D</option>
+          </select>
+        </div>
+        <canvas id="candleCanvas" width="600" height="260"></canvas>
+      </div>
+    </div>
+
+    <!-- 2段階確認モーダル -->
+    <div id="confirmModal" class="modal-backdrop">
+      <div class="modal">
+        <h3 style="color:var(--red);">🚨 緊急全決済 (EMERGENCY_LIQUIDATE_ALL) の確認</h3>
+        <p style="font-size:0.9rem; color:var(--text);">
+          すべての待機注文をキャンセルし、全保有Spotポジションを即座にIOC成行相当で100%売却してシステムを一時停止(PAUSED)します。よろしいですか？
+        </p>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+          <button onclick="closeConfirmModal()">キャンセル</button>
+          <button class="btn-danger" onclick="confirmEmergencyLiquidate()">承認して全決済を実行</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{
+  "name": "HL AI Trader v1 — 暗号化AI自動売買コンソール",
+  "short_name": "HLTraderV1",
+  "description": "ゼロ知識クライアント復号型 Hyperliquid AI自動売買ダッシュボード (AES-256-GCM / PBKDF2-SHA256 150,000回)",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b1220",
+  "theme_color": "#0d9488",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

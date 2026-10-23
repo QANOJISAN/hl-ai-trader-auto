@@ -1,0 +1,48 @@
+# ==============================================================================
+# HL AI Trader v1 — Strict Security .gitignore
+# Never commit secrets, environment files, SQLite databases, logs, or locks.
+# ==============================================================================
+.env
+.env.*
+!.env.example
+.hl_gitconfig
+*.pem
+*.key
+*.pfx
+*.p12
+
+# Runtime data & SQLite WAL databases
+data/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.lock
+
+# Logs & temporary files
+logs/
+*.log
+tmp/
+temp/
+scratch/
+
+# Python virtual environment & caches
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# OS / IDE metadata & local internal docs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+docs/*.md

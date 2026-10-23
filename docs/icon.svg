@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="hlGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0d9488"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#hlGrad)"/>
+  <path d="M24 92 L50 52 L70 72 L104 30" stroke="#5eead4" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="64" y="114" text-anchor="middle" fill="#ffffff" font-family="sans-serif" font-weight="800" font-size="22">HL AI</text>
+</svg>
