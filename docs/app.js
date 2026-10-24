@@ -110,7 +110,7 @@ async function deriveAesGcmKeyFromPassword(password, saltBytes, iterations) {
     },
     baseKey,
     { name: 'AES-GCM', length: 256 },
-    true,
+    false,
     ['decrypt']
   );
   return aesKey;
@@ -135,44 +135,15 @@ async function decryptSnapshotContainerWithPassword(container, password, remembe
   const saltB64 = container.salt_b64;
   const iterations = Number(container.iterations || PBKDF2_ITERATIONS);
 
-  // 1. 同一 salt_b64 の導出済み鍵キャッシュがあれば 0ms で復号試行
-  if (rememberDevice) {
-    try {
-      const cachedRaw = localStorage.getItem(HL_STORAGE_DERIVED_CACHE_KEY);
-      if (cachedRaw) {
-        const cachedObj = JSON.parse(cachedRaw);
-        if (cachedObj && cachedObj.salt_b64 === saltB64 && cachedObj.key_b64) {
-          const rawKeyBytes = b64ToBytes(cachedObj.key_b64);
-          const importedKey = await window.crypto.subtle.importKey(
-            'raw',
-            rawKeyBytes,
-            { name: 'AES-GCM', length: 256 },
-            false,
-            ['decrypt']
-          );
-          return await decryptSnapshotContainerWithKey(container, importedKey);
-        }
-      }
-    } catch (_) {}
-  }
-
-  // 2. Web Crypto API: importKey -> deriveKey (PBKDF2 150,000回) -> decrypt (AES-GCM)
+  // 1. Web Crypto API: importKey (extractable: false) -> deriveKey (PBKDF2 150,000回, extractable: false) -> decrypt (AES-GCM)
   const saltBytes = b64ToBytes(saltB64);
   const aesKey = await deriveAesGcmKeyFromPassword(password, saltBytes, iterations);
   const decryptedData = await decryptSnapshotContainerWithKey(container, aesKey);
 
-  // 3. 端末記憶ON時は導出鍵をキャッシュ（次回起動時 0.5秒以内で即復号）
+  // 2. 端末記憶ON時は非抽出ラップ鍵 (extractable: false) でパスコードをローカル保護（exportKey は一切不使用）
   if (rememberDevice) {
     try {
-      const exportedRaw = await window.crypto.subtle.exportKey('raw', aesKey);
-      localStorage.setItem(
-        HL_STORAGE_DERIVED_CACHE_KEY,
-        JSON.stringify({
-          salt_b64: saltB64,
-          key_b64: bytesToB64(exportedRaw),
-          saved_at_ms: Date.now()
-        })
-      );
+      localStorage.removeItem(HL_STORAGE_DERIVED_CACHE_KEY);
       await saveDeviceWrappedPasscode(password);
     } catch (_) {}
   }
