@@ -1,0 +1,7 @@
+.env
+.env.*
+.hl_gitconfig
+data/*.db
+data/*.db-wal
+data/*.db-shm
+logs/

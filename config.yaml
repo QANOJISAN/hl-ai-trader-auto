@@ -1,0 +1,144 @@
+# ==============================================================================
+# HL AI Trader v1 — Master System Configuration (config.yaml)
+# ==============================================================================
+
+system:
+  project_root: "e:/hl-ai-trader-auto"
+  db_path: "data/hl_v1_state_wal.db"
+  log_dir: "logs"
+  mutex_name: "Global\\HL_AI_TRADER_V1_MAIN_MUTEX"
+  web_host: "127.0.0.1"
+  web_port: 8081
+  git_push_minutes: [8, 23, 38, 53]
+  git_config_global: "e:/hl-ai-trader-auto/.hl_gitconfig"
+  guardian_interval_ms: 200
+  control_interval_sec: 15
+  ai_loop_interval_sec: 900
+  order_expiry_hours: 4.0
+  min_rate_limit_surplus: 500
+
+universe:
+  quote_asset: "USDC"
+  quote_token_idx: 0
+  tier1_core_pairs:
+    - "UBTC/USDC"
+    - "HYPE/USDC"
+    - "UETH/USDC"
+    - "USOL/USDC"
+  tier2_candidate_pairs:
+    - "PURR/USDC"
+    - "UZEC/USDC"
+    - "XMR1/USDC"
+    - "UFART/USDC"
+  filters:
+    tier1_min_day_ntl_vlm_usdc: 5000000.0
+    tier2_min_day_ntl_vlm_usdc: 2000000.0
+    max_mark_mid_divergence_pct: 0.08
+    tier1_max_bbo_spread_pct: 0.08
+    tier2_max_bbo_spread_pct: 0.15
+    min_cumulative_depth_030pct_usdc: 5000.0
+    hip2_uniform_step_pct: 0.30
+    hip2_step_tolerance_pct: 0.04
+    hip2_size_cv_threshold: 0.05
+
+timeframes_and_atr:
+  large_cap_pairs:
+    - "UBTC/USDC"
+    - "UETH/USDC"
+  large_cap:
+    min_1h_atr_pct: 0.85
+    min_15m_atr_pct: 0.45
+    sl_atr_mult: 1.8
+    sl_min_pct: 1.40
+    sl_max_pct: 3.30
+    tp_min_pct: 2.20
+    tp_atr_mult: 2.8
+    freeroll_trigger_gain_pct: 1.20
+    freeroll_lock_offset_pct: 0.15
+    stage3_trigger_gain_pct: 2.00
+    stage4_trigger_gain_pct: 3.20
+  high_beta:
+    min_1h_atr_pct: 1.35
+    min_15m_atr_pct: 0.70
+    sl_atr_mult: 1.6
+    sl_min_pct: 2.00
+    sl_max_pct: 5.00
+    sl_abs_cap_pct: 8.00
+    tp_min_pct: 3.20
+    tp_atr_mult: 2.6
+    freeroll_trigger_gain_pct: 1.80
+    freeroll_lock_offset_pct: 0.15
+    stage3_trigger_gain_pct: 2.80
+    stage4_trigger_gain_pct: 4.50
+
+perp_signals:
+  long_flush_blocker:
+    funding_1h_pct_combined: 0.0050
+    delta_oi_4h_pct_combined: 6.0
+    premium_pct_combined: 0.15
+    funding_1h_pct_solo: 0.0080
+  short_squeeze_boost:
+    max_funding_1h_pct: 0.0
+    min_delta_oi_1h_pct: 2.5
+    max_premium_pct: -0.05
+  in_position_crash_guard:
+    max_delta_oi_15m_pct: -4.5
+    max_premium_pct: -0.20
+    consecutive_ws_ticks: 3
+  spot_oracle_basis_max_pct: 0.20
+
+capital_and_slots:
+  phase1_compounding_target_usdc: 300.0
+  slot1_max_allocation_pct: 0.70
+  slot2_max_allocation_pct: 0.38
+  base_risk_per_trade_pct: 0.020
+  derisked_risk_per_trade_pct: 0.010
+  min_order_notional_usdc: 16.0
+  max_initial_sl_pct: 8.0
+  min_expected_rr_ratio: 1.8
+  base_min_conviction_score: 75
+  derisked_min_conviction_score: 85
+  slot2_gate:
+    min_freeroll_lock_mult: 1.0015
+    min_cushion_atr_1m_mult: 1.5
+    min_cushion_entry_pct: 0.0060
+    min_btc_hype_premium_pct: -0.05
+    min_btc_hype_delta_oi_15m_pct: -1.5
+  parent_child_interlock:
+    slot1_danger_sl_mult: 1.0025
+  post_loss_budget:
+    emergency_flatten_loss_ratio: 0.75
+
+dust_recovery:
+  dust_threshold_usdc: 10.0
+  top_up_target_usdc: 11.0
+  min_free_usdc_required: 15.0
+  wait_after_top_up_ms: 600
+  quiescence_ms: 5000
+  max_recovery_attempts: 3
+
+sanity_and_circuit_breakers:
+  taker_fee_rate: 0.0007
+  maker_fee_rate: 0.0004
+  sanity_filter:
+    tier1_max_rel_spread_pct: 1.5
+    tier2_max_rel_spread_pct: 3.0
+    max_step_change_15s_pct: 8.0
+    tier1_max_oracle_divergence_pct: 2.0
+    max_tainted_cycles: 4
+  circuit_breakers:
+    l1_max_funding_1h_pct: 0.05
+    l1_cancel_distance_pct: 0.50
+    l2_consecutive_losses: 2
+    l2_daily_dd_pct: -1.5
+    l2_btc_delta_oi_1h_pct: -2.5
+    l2_btc_premium_pct: -0.10
+    l2_cooldown_hours: 6.0
+    l3_daily_loss_limit_pct: -3.0
+    l3_required_strikes: 3
+    l4_weekly_loss_limit_pct: -6.0
+    l4_cascade_cooldown_hours: 12.0
+    l5_hard_kill_drawdown_ratio: 0.85
+    l5_required_strikes: 3
+    l5_min_strike_interval_sec: 12.0
+    desync_required_strikes: 3
